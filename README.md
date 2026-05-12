@@ -24,7 +24,7 @@
 ### macOS
 
 ```bash
-git clone https://github.com/<your-account>/codex-cli-bootstrap.git
+git clone https://github.com/hollysheep-ai/codex-cli-bootstrap.git
 cd codex-cli-bootstrap
 bash scripts/macos/install.sh
 ```
@@ -32,7 +32,7 @@ bash scripts/macos/install.sh
 ### Windows
 
 ```powershell
-git clone https://github.com/<your-account>/codex-cli-bootstrap.git
+git clone https://github.com/hollysheep-ai/codex-cli-bootstrap.git
 cd codex-cli-bootstrap
 powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
 ```
