@@ -1,63 +1,152 @@
 # Codex CLI Bootstrap
 
-`macOS`와 `Windows` 사용자가 `Codex CLI`를 쓰기 전에 필요한 기본 도구를 자동으로 설치하는 레포입니다.
+`macOS`와 `Windows` 사용자가 `Codex CLI`를 바로 쓰기 전에 필요한 개발 환경을 자동으로 준비하는 레포입니다.
+
+이 레포는 단순히 `Codex CLI`만 설치하지 않습니다. 실제로 바로 개발 작업을 시작할 수 있도록 기본 개발 도구까지 같이 맞춥니다.
 
 ## 설치되는 항목
 
-- `macOS`
-  - `Homebrew` (없을 때만)
-  - `Git` (없을 때만)
-  - `Codex CLI` (`brew install --cask codex`)
-- `Windows`
-  - `Git for Windows`
-  - `Node.js LTS`
-  - 사용자 전용 `npm global prefix`
-  - `Codex CLI` (`npm install -g @openai/codex`)
+### macOS
+
+- `Xcode Command Line Tools`
+- `Homebrew` (없을 때만)
+- `Git`
+- `Python 3`
+- `ripgrep`
+- `Codex CLI`
+
+### Windows
+
+Windows는 `WSL2 + Ubuntu`를 기본 경로로 사용합니다.
+
+- `WSL2`
+- `Ubuntu` 배포판
+- WSL 내부 `Git`
+- WSL 내부 `curl` / `ca-certificates`
+- WSL 내부 `build-essential`
+- WSL 내부 `Python 3`, `python3-venv`, `python3-pip`
+- WSL 내부 `ripgrep`
+- WSL 내부 `Node.js 20 LTS`
+- WSL 내부 `Codex CLI`
+
+## 왜 Python과 C++ 개발 도구까지 넣었나
+
+`Codex CLI` 자체는 주로 `Node.js` 기반으로 동작합니다. 하지만 실제 개발 환경에서는 아래가 자주 필요합니다.
+
+- `Python`
+  - Python 프로젝트 실행
+  - 가상환경 생성
+  - 스크립트 자동화
+- `build-essential` 또는 `Xcode Command Line Tools`
+  - `gcc` / `g++` / `make`
+  - 네이티브 모듈 빌드
+  - 일부 `npm` 패키지나 Python 패키지 컴파일
+- `ripgrep`
+  - 대형 코드베이스 검색
+
+즉, `Codex`를 설치만 해놓고 실제 프로젝트에서 바로 막히지 않도록 베이스라인을 같이 준비하는 구성입니다.
 
 ## 지원 환경
 
 - `macOS 13+`
-- `Windows 10/11` with `winget`
+- `Windows 10/11`
 
 ## 사용 방법
 
-### macOS
+`Git`이 아직 없는 Windows 사용자도 시작할 수 있도록 ZIP 다운로드 방식으로 써도 됩니다.
+
+### 1. 레포 받기
+
+선택 1:
 
 ```bash
 git clone https://github.com/hollysheep-ai/codex-cli-bootstrap.git
 cd codex-cli-bootstrap
+```
+
+선택 2:
+
+- GitHub 레포에서 `Code > Download ZIP`
+- 압축 해제
+- 해당 폴더로 이동
+
+### 2. macOS 설치
+
+터미널에서 실행:
+
+```bash
 bash scripts/macos/install.sh
+```
+
+### 3. Windows 설치
+
+중요:
+
+- `PowerShell`을 관리자 권한으로 실행하는 것을 권장합니다.
+- 첫 실행에서 `WSL2` 기능 설치나 `Ubuntu` 초기화 때문에 재부팅 또는 사용자 생성이 필요할 수 있습니다.
+- 그런 경우 안내에 따라 `Ubuntu`를 한 번 열어 Linux 사용자 생성을 끝낸 뒤, 같은 스크립트를 다시 실행하면 됩니다.
+
+PowerShell에서 실행:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
+```
+
+## 설치 후 사용
+
+### macOS
+
+새 터미널을 열고:
+
+```bash
+codex
 ```
 
 ### Windows
 
-```powershell
-git clone https://github.com/hollysheep-ai/codex-cli-bootstrap.git
-cd codex-cli-bootstrap
-powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
+`Ubuntu` 또는 원하는 WSL 셸을 열고:
+
+```bash
+codex
 ```
 
-## 설치 후
+## 설치 후 확인
 
-1. 새 터미널을 엽니다.
-2. `codex`를 실행합니다.
-3. `Sign in with ChatGPT` 또는 API 키 방식으로 로그인합니다.
+### macOS
+
+```bash
+git --version
+python3 --version
+rg --version
+codex --version
+```
+
+### Windows / WSL
+
+```bash
+git --version
+python3 --version
+g++ --version
+rg --version
+node --version
+codex --version
+```
 
 ## 동작 방식
 
-- 스크립트는 이미 설치된 구성 요소를 감지하고 필요한 것만 설치합니다.
-- `Windows`에서는 관리자 권한 없이 `Codex CLI`를 설치할 수 있도록 `npm` 전역 설치 경로를 사용자 폴더로 바꿉니다.
-- 설치가 끝나면 `git --version`, `node --version`(Windows), `codex --version`을 확인합니다.
+- `macOS`는 로컬 셸 환경에 직접 설치합니다.
+- `Windows`는 `WSL2`와 `Ubuntu`를 준비한 뒤, 실제 개발 도구 설치는 `Ubuntu` 안에서 수행합니다.
+- `Windows` 쪽 `Codex CLI`도 `Windows` 본체가 아니라 `WSL` 안에 설치됩니다.
 
 ## 주의 사항
 
-- `Windows` 스크립트는 `winget`이 필요합니다. 없다면 Microsoft `App Installer`를 먼저 최신 상태로 맞춰야 합니다.
-- `macOS` 스크립트는 공식 `Homebrew` 설치 스크립트를 사용하므로 인터넷 연결이 필요합니다.
-- 이 레포는 `Codex CLI` 설치와 선행 도구 준비까지만 자동화합니다. 계정 로그인과 실제 모델 설정은 사용자 단계입니다.
+- `macOS`에서 `Xcode Command Line Tools`가 없으면 Apple 설치 UI가 열릴 수 있습니다.
+- `Windows`에서 `WSL2` 첫 설치는 재부팅이 필요할 수 있습니다.
+- `Codex CLI` 로그인은 자동화하지 않습니다. 설치 후 사용자가 직접 로그인해야 합니다.
 
 ## 검증
 
-GitHub Actions에서 아래를 검사하도록 포함했습니다.
+GitHub Actions에서 아래를 검사합니다.
 
 - `bash` 문법 검사
 - `PowerShell` 파서 검사

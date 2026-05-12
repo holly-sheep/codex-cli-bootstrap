@@ -6,46 +6,9 @@ function Write-Info {
   Write-Host "[INFO] $Message" -ForegroundColor Cyan
 }
 
-function Write-WarnMessage {
-  param([string]$Message)
-  Write-Host "[WARN] $Message" -ForegroundColor Yellow
-}
-
 function Test-Command {
   param([string]$Name)
   return [bool](Get-Command $Name -ErrorAction SilentlyContinue)
-}
-
-function Add-PathEntry {
-  param(
-    [string]$PathEntry,
-    [ValidateSet("Process", "User")]
-    [string]$Scope = "Process"
-  )
-
-  if ([string]::IsNullOrWhiteSpace($PathEntry)) {
-    return
-  }
-
-  $target = [System.EnvironmentVariableTarget]::$Scope
-  $currentPath = [Environment]::GetEnvironmentVariable("Path", $target)
-  $entries = @()
-
-  if (-not [string]::IsNullOrWhiteSpace($currentPath)) {
-    $entries = $currentPath -split ";"
-  }
-
-  if ($entries -contains $PathEntry) {
-    return
-  }
-
-  $updatedPath = if ([string]::IsNullOrWhiteSpace($currentPath)) {
-    $PathEntry
-  } else {
-    "$currentPath;$PathEntry"
-  }
-
-  [Environment]::SetEnvironmentVariable("Path", $updatedPath, $target)
 }
 
 function Install-WingetPackage {
@@ -69,15 +32,14 @@ function Ensure-Winget {
   Write-Info "winget detected."
 }
 
-function Ensure-Git {
+function Ensure-GitForWindows {
   $gitPath = "C:\Program Files\Git\cmd"
   if (Test-Path $gitPath) {
-    Add-PathEntry -PathEntry $gitPath -Scope Process
-    Add-PathEntry -PathEntry $gitPath -Scope User
+    $env:Path = "$gitPath;$env:Path"
   }
 
   if (Test-Command "git") {
-    Write-Info "Git already installed: $(& git --version)"
+    Write-Info "Git for Windows already installed: $(& git --version)"
     return
   }
 
@@ -85,115 +47,88 @@ function Ensure-Git {
   Install-WingetPackage -PackageId "Git.Git"
 
   if (Test-Path $gitPath) {
-    Add-PathEntry -PathEntry $gitPath -Scope Process
-    Add-PathEntry -PathEntry $gitPath -Scope User
+    $env:Path = "$gitPath;$env:Path"
   }
 
   if (-not (Test-Command "git")) {
     throw "Git installation finished, but git is still not available on PATH."
   }
 
-  Write-Info "Git installed: $(& git --version)"
+  Write-Info "Git for Windows installed: $(& git --version)"
 }
 
-function Ensure-Node {
-  $needsInstall = $true
-  $nodePath = "C:\Program Files\nodejs"
-
-  if (Test-Path $nodePath) {
-    Add-PathEntry -PathEntry $nodePath -Scope Process
-    Add-PathEntry -PathEntry $nodePath -Scope User
+function Ensure-WslCommand {
+  if (-not (Test-Command "wsl.exe")) {
+    throw "wsl.exe is not available. Update Windows first, then rerun this installer from an elevated PowerShell."
   }
+}
 
-  if (Test-Command "node") {
-    $nodeVersionText = (& node --version).Trim()
-    $nodeVersion = [Version]($nodeVersionText.TrimStart("v"))
+function Ensure-WslUbuntu {
+  Write-Info "Ensuring WSL2 default version..."
+  & wsl.exe --set-default-version 2 | Out-Host
 
-    if ($nodeVersion.Major -ge 16) {
-      $needsInstall = $false
-      Write-Info "Node.js already installed: $nodeVersionText"
-    } else {
-      Write-WarnMessage "Node.js version $nodeVersionText is too old. Upgrading to LTS."
+  $distros = @(& wsl.exe --list --quiet 2>$null)
+  $ubuntuDistro = $null
+
+  foreach ($distro in $distros) {
+    if ($distro -match "Ubuntu") {
+      $ubuntuDistro = $distro.Trim()
+      break
     }
   }
 
-  if ($needsInstall) {
-    Write-Info "Installing Node.js LTS..."
-    Install-WingetPackage -PackageId "OpenJS.NodeJS.LTS"
+  if ([string]::IsNullOrWhiteSpace($ubuntuDistro)) {
+    Write-Info "Installing Ubuntu on WSL..."
+    & wsl.exe --install -d Ubuntu | Out-Host
+    throw "Ubuntu installation was started. Reboot if Windows asks, launch Ubuntu once to create a Linux user, then rerun this script."
   }
 
-  if (Test-Path $nodePath) {
-    Add-PathEntry -PathEntry $nodePath -Scope Process
-    Add-PathEntry -PathEntry $nodePath -Scope User
+  try {
+    & wsl.exe -d $ubuntuDistro -- bash -lc "echo ok" | Out-Null
+  } catch {
+    throw "Ubuntu is installed but not initialized. Open Ubuntu once, complete Linux user creation, then rerun this script."
   }
 
-  if (-not (Test-Command "node")) {
-    throw "Node.js installation finished, but node is still not available on PATH."
-  }
-
-  Write-Info "Node.js ready: $(& node --version)"
-  Write-Info "npm ready: $(& npm --version)"
+  Write-Info "WSL Ubuntu is ready: $ubuntuDistro"
+  return $ubuntuDistro
 }
 
-function Ensure-NpmPrefix {
-  $npmPrefix = Join-Path $env:LOCALAPPDATA "npm"
+function Get-WslScriptPath {
+  $windowsPath = (Resolve-Path (Join-Path $PSScriptRoot "..\linux\install.sh")).Path
+  $wslPath = (& wsl.exe wslpath -a $windowsPath).Trim()
 
-  if (-not (Test-Path $npmPrefix)) {
-    New-Item -ItemType Directory -Path $npmPrefix | Out-Null
+  if ([string]::IsNullOrWhiteSpace($wslPath)) {
+    throw "Failed to convert Linux installer path to a WSL path."
   }
 
-  & npm config set prefix $npmPrefix | Out-Null
-  Add-PathEntry -PathEntry $npmPrefix -Scope Process
-  Add-PathEntry -PathEntry $npmPrefix -Scope User
-
-  Write-Info "npm global prefix set to $npmPrefix"
-  return $npmPrefix
+  return $wslPath
 }
 
-function Ensure-Codex {
-  param([string]$NpmPrefix)
+function Invoke-WslBootstrap {
+  param(
+    [string]$WslDistro,
+    [string]$WslScriptPath
+  )
 
-  if (Test-Command "codex") {
-    Write-Info "Codex CLI already installed: $(& codex --version)"
-    return
-  }
-
-  $codexShim = Join-Path $NpmPrefix "codex.cmd"
-  if (Test-Path $codexShim) {
-    Write-Info "Codex CLI already installed: $(& $codexShim --version)"
-    return
-  }
-
-  Write-Info "Installing Codex CLI..."
-  & npm install -g @openai/codex
-
-  if (Test-Command "codex") {
-    Write-Info "Codex CLI installed: $(& codex --version)"
-    return
-  }
-
-  if (-not (Test-Path $codexShim)) {
-    throw "Codex installation finished, but codex.cmd was not found."
-  }
-
-  Write-Info "Codex CLI installed: $(& $codexShim --version)"
-  Write-WarnMessage "Open a new PowerShell window if the 'codex' command is not found immediately."
+  Write-Info "Running Linux bootstrap inside Ubuntu WSL..."
+  & wsl.exe -d $WslDistro -- bash -lc "bash '$WslScriptPath'"
 }
 
 if ($env:OS -ne "Windows_NT") {
   throw "This installer only supports Windows."
 }
 
-Write-Info "Starting Windows Codex CLI bootstrap..."
+Write-Info "Starting Windows Codex bootstrap..."
 Ensure-Winget
-Ensure-Git
-Ensure-Node
-$npmPrefix = Ensure-NpmPrefix
-Ensure-Codex -NpmPrefix $npmPrefix
+Ensure-GitForWindows
+Ensure-WslCommand
+$wslDistro = Ensure-WslUbuntu
+$wslScriptPath = Get-WslScriptPath
+Invoke-WslBootstrap -WslDistro $wslDistro -WslScriptPath $wslScriptPath
 
 Write-Host ""
 Write-Info "Installation complete."
 Write-Host "Next steps:"
-Write-Host "  1. Open a new terminal if 'codex' is not found immediately."
+Write-Host "  1. Open Ubuntu or your preferred WSL shell."
 Write-Host "  2. Run: codex"
 Write-Host "  3. Sign in with ChatGPT or configure API authentication."

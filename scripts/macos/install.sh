@@ -10,10 +10,6 @@ info() {
   printf '[INFO] %s\n' "$1"
 }
 
-warn() {
-  printf '[WARN] %s\n' "$1"
-}
-
 resolve_brew() {
   if command -v brew >/dev/null 2>&1; then
     return 0
@@ -32,6 +28,18 @@ resolve_brew() {
   return 1
 }
 
+ensure_xcode_clt() {
+  if xcode-select -p >/dev/null 2>&1; then
+    info "Xcode Command Line Tools already installed."
+    return 0
+  fi
+
+  info "Requesting Xcode Command Line Tools installation..."
+  xcode-select --install || true
+  echo "[WARN] Complete the Xcode Command Line Tools installation, then rerun this script."
+  exit 0
+}
+
 ensure_homebrew() {
   if resolve_brew; then
     info "Homebrew already installed."
@@ -48,15 +56,12 @@ ensure_homebrew() {
   fi
 }
 
-ensure_git() {
-  if command -v git >/dev/null 2>&1; then
-    info "Git already installed: $(git --version)"
-    return 0
-  fi
-
-  info "Installing Git..."
-  brew install git
-  info "Git installed: $(git --version)"
+ensure_base_packages() {
+  info "Installing baseline development packages..."
+  brew install git python ripgrep
+  info "Git ready: $(git --version)"
+  info "Python ready: $(python3 --version)"
+  info "ripgrep ready: $(rg --version | head -n 1)"
 }
 
 ensure_codex() {
@@ -67,24 +72,24 @@ ensure_codex() {
 
   info "Installing Codex CLI..."
   brew install --cask codex
-
-  if ! command -v codex >/dev/null 2>&1; then
-    warn "Codex CLI was installed, but the current shell cannot find it yet."
-    warn "Open a new terminal and run: codex --version"
-    return 0
-  fi
-
   info "Codex CLI installed: $(codex --version | head -n 1)"
 }
 
 main() {
-  info "Starting macOS Codex CLI bootstrap..."
+  info "Starting macOS Codex bootstrap..."
+  ensure_xcode_clt
   ensure_homebrew
-  ensure_git
+  ensure_base_packages
   ensure_codex
 
   printf '\n'
   info "Installation complete."
+  printf 'Checks:\n'
+  printf '  git: %s\n' "$(git --version)"
+  printf '  python: %s\n' "$(python3 --version)"
+  printf '  rg: %s\n' "$(rg --version | head -n 1)"
+  printf '  codex: %s\n' "$(codex --version | head -n 1)"
+  printf '\n'
   printf 'Next steps:\n'
   printf '  1. Open a new terminal if `codex` is not found immediately.\n'
   printf '  2. Run: codex\n'

@@ -14,6 +14,9 @@ jobs:
       - name: Validate bash installer syntax
         run: bash -n scripts/macos/install.sh
 
+      - name: Validate Linux installer syntax
+        run: bash -n scripts/linux/install.sh
+
       - name: Validate PowerShell installer syntax
         shell: pwsh
         run: |
