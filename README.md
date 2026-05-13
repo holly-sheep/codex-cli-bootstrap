@@ -88,6 +88,57 @@ Windows는 `WSL2 + Ubuntu`를 기본 경로로 사용합니다.
 
 `Git`이 아직 없는 Windows 사용자도 시작할 수 있도록 ZIP 다운로드 방식으로 써도 됩니다.
 
+### 공급망 동결 중 Codex CLI만 설치
+
+`npm`, `brew`, `apt`, `winget`을 쓰지 않고 OpenAI 공식 GitHub Release binary를 직접 설치할 수 있습니다.
+
+이 경로는 기본 개발 도구까지 맞추는 전체 bootstrap이 아니라 `Codex CLI` binary만 설치합니다. 시스템에 `curl`, `tar`, `shasum` 또는 `sha256sum`이 있어야 합니다.
+
+이 direct release 설치는 공급망 동결 중 임시 예외입니다. 패키지 매니저 동결 해제의 대체 절차가 아니며, 신뢰 경계는 `github.com/openai/codex` release, GitHub TLS/CDN, 이 레포에 고정된 digest로 이동합니다. `latest`, alpha/pre-release, branch, mutable URL은 쓰지 않습니다. digest 변경은 tag, asset name, SHA-256 근거를 남기고 별도 리뷰 후 반영해야 합니다.
+
+`sudo`로 실행하지 마세요. 기본 설치 위치는 사용자 소유 경로인 `$HOME/.local/bin`이며, 같은 위치에 기존 `codex`가 있으면 덮어씁니다.
+
+```bash
+bash scripts/codex/install-release.sh
+```
+
+기본값은 검증된 release `rust-v0.130.0`입니다. 플랫폼별 archive SHA-256을 스크립트에 고정해두고 다운로드 후 검증합니다.
+
+현재 고정된 release asset:
+
+| Platform | Asset | SHA-256 |
+| --- | --- | --- |
+| macOS arm64 | `codex-aarch64-apple-darwin.tar.gz` | `bc50a4b7f9a0c8ca99179189e4659b601107830770e21547dc0c246bce733577` |
+| macOS x86_64 | `codex-x86_64-apple-darwin.tar.gz` | `feddb116bd96d7d83f8bb19b34fbabe6843cc64461baf2e49c017e1206ad5e67` |
+| Linux arm64 | `codex-aarch64-unknown-linux-musl.tar.gz` | `1d7e00f2c22c3016b5bcb71c61010947b022a90e2901bc6baafe82256492c767` |
+| Linux x86_64 | `codex-x86_64-unknown-linux-musl.tar.gz` | `16779e7b7857508a768a36d7d4e084eec336ec23946ed70a9b09489b8f861190` |
+
+Windows 신규 환경은 공급망 동결 중 지원하지 않습니다. 신규 `WSL2`/`Ubuntu` 설치에는 `winget`, `wsl --install`, `apt`가 필요하기 때문입니다. 이미 WSL이 준비된 사용자는 WSL 안에서 위 Linux direct release 설치를 실행하세요.
+
+OpenAI 공식 release에는 `install.sh`/`install.ps1` asset도 있지만, 기존 `npm`/`brew`/`bun` 설치를 감지하면 제거 여부를 물을 수 있습니다. 동결 중에는 이 bootstrap의 `scripts/codex/install-release.sh`를 기본 경로로 사용하고, 공식 installer asset은 내용을 검토하고 digest를 검증한 경우에만 별도 승인으로 사용하세요.
+
+Linux musl asset에는 `.sigstore` 파일이 함께 제공됩니다. 이 스크립트는 `cosign` 같은 추가 도구를 설치하지 않기 위해 SHA-256 검증만 수행합니다. Sigstore 검증은 도구가 이미 준비된 환경에서 추가 검증으로 수행하세요.
+
+설치 위치를 바꾸려면:
+
+```bash
+CODEX_INSTALL_DIR="$HOME/bin" bash scripts/codex/install-release.sh
+```
+
+다른 release를 수동 지정하려면 digest도 함께 지정해야 합니다.
+
+```bash
+CODEX_RELEASE_TAG="<approved-release-tag>" \
+CODEX_RELEASE_SHA256="<approved-64-char-sha256>" \
+bash scripts/codex/install-release.sh
+```
+
+Digest 갱신 절차:
+
+- OpenAI 공식 `openai/codex` release의 tag, asset name, GitHub API `digest` 값을 근거로 남깁니다.
+- `latest` 자동 추적, alpha/pre-release, branch URL은 사용하지 않습니다.
+- digest 변경은 별도 리뷰 후 `scripts/codex/install-release.sh`와 위 표를 함께 갱신합니다.
+
 ### 1. 레포 받기
 
 선택 1:
@@ -187,6 +238,7 @@ GitHub Actions에서 아래를 검사합니다.
 - `bash` 문법 검사
 - `PowerShell` 파서 검사
 - Linux 설치 스모크 테스트
+- Codex release binary 설치 스모크 테스트
 - Windows WSL distro 선택 로직 테스트
 
 ## 라이선스

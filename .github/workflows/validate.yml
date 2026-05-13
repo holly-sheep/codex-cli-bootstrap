@@ -17,9 +17,12 @@ jobs:
       - name: Validate Linux installer syntax
         run: bash -n scripts/linux/install.sh
 
+      - name: Validate Codex release installer syntax
+        run: bash -n scripts/codex/install-release.sh
+
       - name: Ensure shell scripts use LF endings
         run: |
-          if grep -R $'\r' scripts/*.sh tests/linux/*.sh >/dev/null; then
+          if find scripts tests -type f -name '*.sh' -print0 | xargs -0 grep $'\r' >/dev/null; then
             echo "CRLF detected in shell scripts."
             exit 1
           fi
@@ -42,6 +45,9 @@ jobs:
 
       - name: Run Linux installer smoke test
         run: bash tests/linux/install-smoke.sh
+
+      - name: Run Codex release installer smoke test
+        run: bash tests/codex/install-release-smoke.sh
 
       - name: Run Windows installer unit tests
         shell: pwsh
