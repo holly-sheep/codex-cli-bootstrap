@@ -10,6 +10,17 @@ info() {
   printf '[INFO] %s\n' "$1"
 }
 
+assert_package_installs_allowed() {
+  if [[ "${CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS:-}" == "1" ]]; then
+    return 0
+  fi
+
+  echo "[ERROR] Package installation and update steps are currently disabled."
+  echo "[ERROR] This would call package managers such as Homebrew."
+  echo "[ERROR] Set CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS=1 only after you intentionally lift the supply-chain freeze."
+  exit 2
+}
+
 resolve_brew() {
   if command -v brew >/dev/null 2>&1; then
     return 0
@@ -35,6 +46,7 @@ ensure_xcode_clt() {
   fi
 
   info "Requesting Xcode Command Line Tools installation..."
+  assert_package_installs_allowed
   xcode-select --install || true
   echo "[WARN] Complete the Xcode Command Line Tools installation, then rerun this script."
   exit 0
@@ -47,6 +59,7 @@ ensure_homebrew() {
   fi
 
   info "Installing Homebrew..."
+  assert_package_installs_allowed
   NONINTERACTIVE=1 /bin/bash -c \
     "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
@@ -58,6 +71,7 @@ ensure_homebrew() {
 
 ensure_base_packages() {
   info "Installing baseline development packages..."
+  assert_package_installs_allowed
   brew install git python ripgrep
   info "Git ready: $(git --version)"
   info "Python ready: $(python3 --version)"
@@ -71,6 +85,7 @@ ensure_codex() {
   fi
 
   info "Installing Codex CLI..."
+  assert_package_installs_allowed
   brew install --cask codex
   info "Codex CLI installed: $(codex --version | head -n 1)"
 }

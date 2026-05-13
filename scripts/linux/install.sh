@@ -14,6 +14,17 @@ warn() {
   printf '[WARN] %s\n' "$1"
 }
 
+assert_package_installs_allowed() {
+  if [[ "${CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS:-}" == "1" ]]; then
+    return 0
+  fi
+
+  echo "[ERROR] Package installation and update steps are currently disabled."
+  echo "[ERROR] This would call package managers such as apt, NodeSource, or npm."
+  echo "[ERROR] Set CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS=1 only after you intentionally lift the supply-chain freeze."
+  exit 2
+}
+
 require_sudo() {
   if ! command -v sudo >/dev/null 2>&1; then
     echo "[ERROR] sudo is required."
@@ -23,6 +34,7 @@ require_sudo() {
 
 ensure_apt_packages() {
   info "Installing baseline development packages..."
+  assert_package_installs_allowed
   sudo apt-get update
   sudo apt-get install -y \
     build-essential \
@@ -51,6 +63,7 @@ ensure_nodejs() {
 
   if [[ "$needs_node" -eq 1 ]]; then
     info "Installing Node.js 20 LTS..."
+    assert_package_installs_allowed
     curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
     sudo apt-get install -y nodejs
   fi
@@ -87,6 +100,7 @@ ensure_codex() {
   fi
 
   info "Installing Codex CLI..."
+  assert_package_installs_allowed
   npm install -g @openai/codex
   info "Codex CLI installed: $(codex --version | head -n 1)"
 }
@@ -115,4 +129,6 @@ main() {
   printf '  3. Sign in with ChatGPT or configure API authentication.\n'
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

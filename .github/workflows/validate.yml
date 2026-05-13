@@ -17,6 +17,13 @@ jobs:
       - name: Validate Linux installer syntax
         run: bash -n scripts/linux/install.sh
 
+      - name: Ensure shell scripts use LF endings
+        run: |
+          if grep -R $'\r' scripts/*.sh tests/linux/*.sh >/dev/null; then
+            echo "CRLF detected in shell scripts."
+            exit 1
+          fi
+
       - name: Validate PowerShell installer syntax
         shell: pwsh
         run: |
@@ -32,3 +39,10 @@ jobs:
             $errors | ForEach-Object { Write-Error $_.Message }
             exit 1
           }
+
+      - name: Run Linux installer smoke test
+        run: bash tests/linux/install-smoke.sh
+
+      - name: Run Windows installer unit tests
+        shell: pwsh
+        run: ./tests/windows/install.tests.ps1
