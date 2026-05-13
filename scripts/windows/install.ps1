@@ -56,7 +56,7 @@ function Invoke-NativeCommand {
 
   if (-not $AllowFailure -and $exitCode -ne 0) {
     $display = Format-CommandForDisplay -FilePath $FilePath -Arguments $Arguments
-    throw "Command failed with exit code $exitCode: $display"
+    throw "Command failed with exit code ${exitCode}: $display"
   }
 
   return $exitCode
@@ -75,7 +75,7 @@ function Invoke-NativeCommandCapture {
 
   if (-not $AllowFailure -and $exitCode -ne 0) {
     $display = Format-CommandForDisplay -FilePath $FilePath -Arguments $Arguments
-    throw "Command failed with exit code $exitCode: $display"
+    throw "Command failed with exit code ${exitCode}: $display"
   }
 
   return $output
