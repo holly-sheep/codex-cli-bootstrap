@@ -66,7 +66,10 @@ CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS=1 bash scripts/linux/install.sh
 
 Windows PowerShell:
 
+Windows에서는 먼저 파일 탐색기에서 `README.md`와 `scripts` 폴더가 바로 보이는 폴더 주소를 `Ctrl+C`로 복사한 뒤, 관리자 권한 Windows PowerShell에 아래 3줄을 입력합니다. 첫 줄의 따옴표 안에는 복사한 폴더 경로를 붙여넣습니다.
+
 ```powershell
+Set-Location -LiteralPath "여기에_복사한_폴더_경로를_붙여넣으세요"
 $env:CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS = "1"
 powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
 ```
@@ -99,26 +102,63 @@ eval "$(/usr/local/bin/brew shellenv)"
 
 ## Windows에서 `winget is required`가 나올 때
 
-`winget`은 Microsoft의 App Installer에 포함되어 있습니다.
+`winget`은 어려운 개발 도구가 아닙니다. Windows가 프로그램을 자동 설치할 때 쓰는 Microsoft 기본 설치 도우미입니다.
+
+사용자가 `winget` 명령을 배울 필요는 없습니다. 아래만 하면 됩니다.
 
 1. Microsoft Store를 엽니다.
 2. **App Installer**를 검색합니다.
-3. 설치 또는 업데이트합니다.
-4. PowerShell을 새로 열고 다시 실행합니다.
+3. **App Installer**를 설치하거나 업데이트합니다.
+4. PowerShell을 완전히 닫았다가 새로 엽니다.
+5. 파일 탐색기에서 `README.md`와 `scripts` 폴더가 보이는 폴더 주소를 `Ctrl+C`로 복사합니다.
+6. 관리자 권한 PowerShell에 아래 3줄을 입력합니다. 첫 줄의 따옴표 안에는 방금 복사한 폴더 경로를 붙여넣습니다.
+
+```powershell
+Set-Location -LiteralPath "여기에_복사한_폴더_경로를_붙여넣으세요"
+$env:CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS = "1"
+powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
+```
+
+예시는 아래처럼 보입니다.
+
+```powershell
+Set-Location -LiteralPath "C:\Users\내이름\Downloads\codex-cli-bootstrap-main"
+$env:CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS = "1"
+powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
+```
+
+그래도 안 되면 Windows 업데이트가 밀려 있을 수 있습니다. Windows 업데이트를 먼저 진행한 뒤 다시 시도하세요.
 
 ## Windows에 WSL2나 Ubuntu가 아직 없을 때
 
-README의 [Windows PowerShell](../README.md#windows-powershell) 섹션으로 가서 전체 설치 명령을 실행하세요. 빠른 설치 명령은 이미 Linux/WSL 셸이 준비된 사람을 위한 경로입니다.
+빠른 설치 명령은 이미 Linux/WSL 셸이 준비된 사람을 위한 경로입니다. Windows 초보자는 [Windows 완전 초보자용 설치 순서](WINDOWS-BEGINNER.md)를 먼저 따라가세요.
+
+이미 저장소 폴더를 열어둔 상태라면, `README.md`와 `scripts` 폴더가 바로 보이는 폴더 주소를 `Ctrl+C`로 복사한 뒤 관리자 권한 Windows PowerShell에 아래 3줄을 입력하세요. 첫 줄의 따옴표 안에는 복사한 폴더 경로를 붙여넣습니다. GitHub ZIP으로 받은 경우 폴더 이름은 `codex-cli-bootstrap-main`처럼 보일 수 있습니다.
+
+관리자 PowerShell을 열었는데 저장소 폴더가 아니라면, 파일 탐색기에서 `README.md`와 `scripts` 폴더가 보이는 폴더 주소를 `Ctrl+C`로 복사한 뒤 아래 3줄을 입력합니다. 첫 줄의 따옴표 안에는 복사한 폴더 경로를 붙여넣습니다.
+
+```powershell
+Set-Location -LiteralPath "여기에_복사한_폴더_경로를_붙여넣으세요"
+$env:CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS = "1"
+powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
+```
+
+이 명령은 **Windows PowerShell**에 붙여넣는 명령입니다. Ubuntu 앱에 입력하는 명령이 아닙니다.
+
+`.\scripts\windows\install.ps1` 파일을 찾을 수 없다는 메시지가 나오면 PowerShell 위치가 잘못된 것입니다. 파일 탐색기에서 `README.md`와 `scripts` 폴더가 바로 보이는 폴더 주소를 다시 `Ctrl+C`로 복사한 뒤, 위 3줄을 다시 입력하세요. 첫 줄의 따옴표 안에는 복사한 폴더 경로를 붙여넣습니다.
 
 처음 Windows 환경에서는 아래 순서가 정상입니다.
 
 1. 관리자 권한 PowerShell에서 Windows 설치 명령 실행
-2. 스크립트가 WSL2와 Ubuntu 설치를 시작
-3. 재부팅 안내가 나오면 재부팅
-4. 시작 메뉴에서 Ubuntu 실행
-5. Linux 사용자 이름과 비밀번호 생성
-6. 같은 PowerShell 설치 명령 다시 실행
-7. 설치 완료 후 Ubuntu에서 `codex` 실행
+2. 스크립트가 Windows 기본 설치 도우미와 WSL2 상태를 확인
+3. 스크립트가 WSL2와 Ubuntu 설치를 시작
+4. 재부팅 안내가 나오면 재부팅
+5. Windows 시작 메뉴에서 Ubuntu 실행
+6. Ubuntu에서 새 사용자 이름과 비밀번호 생성
+   - Windows 계정과 달라도 됩니다.
+   - 비밀번호를 입력할 때 화면에 글자가 안 보여도 정상입니다.
+7. 파일 탐색기에서 `README.md`와 `scripts` 폴더가 보이는 폴더 주소를 다시 `Ctrl+C`로 복사한 뒤, 같은 3줄 PowerShell 설치 명령 다시 실행
+8. 설치 완료 후 Ubuntu에서 `codex` 실행
 
 ## Windows에서 WSL 설치 후 다시 실행하라고 할 때
 
@@ -127,7 +167,14 @@ README의 [Windows PowerShell](../README.md#windows-powershell) 섹션으로 가
 1. Windows를 재부팅하라는 안내가 있으면 재부팅합니다.
 2. 시작 메뉴에서 **Ubuntu**를 엽니다.
 3. Linux 사용자 이름과 비밀번호를 만듭니다.
-4. 저장소 폴더로 돌아가 설치 명령을 다시 실행합니다.
+4. 파일 탐색기에서 `README.md`와 `scripts` 폴더가 보이는 폴더 주소를 `Ctrl+C`로 복사합니다.
+5. 관리자 권한 PowerShell을 열고 아래 3줄을 입력합니다. 첫 줄의 따옴표 안에는 복사한 폴더 경로를 붙여넣습니다.
+
+```powershell
+Set-Location -LiteralPath "여기에_복사한_폴더_경로를_붙여넣으세요"
+$env:CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS = "1"
+powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
+```
 
 ## Windows에서 `codex`를 PowerShell에서 못 찾을 때
 

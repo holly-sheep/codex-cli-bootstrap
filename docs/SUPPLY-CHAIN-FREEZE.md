@@ -45,7 +45,18 @@ CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS=1 bash scripts/linux/install.sh
 
 Windows PowerShell:
 
+Windows에서는 먼저 파일 탐색기에서 `README.md`와 `scripts` 폴더가 바로 보이는 폴더 주소를 `Ctrl+C`로 복사한 뒤, 관리자 권한 Windows PowerShell에 아래 3줄을 입력합니다. 첫 줄의 따옴표 안에는 복사한 폴더 경로를 붙여넣습니다.
+
 ```powershell
+Set-Location -LiteralPath "여기에_복사한_폴더_경로를_붙여넣으세요"
+$env:CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS = "1"
+powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
+```
+
+예시는 아래처럼 보입니다.
+
+```powershell
+Set-Location -LiteralPath "C:\Users\내이름\Downloads\codex-cli-bootstrap-main"
 $env:CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS = "1"
 powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
 ```
