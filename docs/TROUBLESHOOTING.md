@@ -106,6 +106,20 @@ eval "$(/usr/local/bin/brew shellenv)"
 3. 설치 또는 업데이트합니다.
 4. PowerShell을 새로 열고 다시 실행합니다.
 
+## Windows에 WSL2나 Ubuntu가 아직 없을 때
+
+README의 [Windows PowerShell](../README.md#windows-powershell) 섹션으로 가서 전체 설치 명령을 실행하세요. 빠른 설치 명령은 이미 Linux/WSL 셸이 준비된 사람을 위한 경로입니다.
+
+처음 Windows 환경에서는 아래 순서가 정상입니다.
+
+1. 관리자 권한 PowerShell에서 Windows 설치 명령 실행
+2. 스크립트가 WSL2와 Ubuntu 설치를 시작
+3. 재부팅 안내가 나오면 재부팅
+4. 시작 메뉴에서 Ubuntu 실행
+5. Linux 사용자 이름과 비밀번호 생성
+6. 같은 PowerShell 설치 명령 다시 실행
+7. 설치 완료 후 Ubuntu에서 `codex` 실행
+
 ## Windows에서 WSL 설치 후 다시 실행하라고 할 때
 
 처음 WSL/Ubuntu를 설치할 때는 한 번에 끝나지 않을 수 있습니다.
