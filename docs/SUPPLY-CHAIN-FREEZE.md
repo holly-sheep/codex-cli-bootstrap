@@ -23,7 +23,7 @@
 - `brew install`, `brew install --cask`
 - `apt-get update`, `apt-get install`
 - NodeSource 설치 스크립트 실행
-- `npm install -g @openai/codex`
+- `npm install -g @openai/codex` 또는 고정 버전 설치 `npm install -g @openai/codex@0.130.0`
 - `winget install`
 - 신규 WSL/Ubuntu 설치 또는 WSL 버전 업그레이드
 

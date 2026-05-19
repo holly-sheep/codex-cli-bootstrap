@@ -79,6 +79,23 @@ C:\Users\내이름\Downloads\codex-cli-bootstrap-main
 
 방금 폴더 경로를 복사했다면, 다음 단계에서 첫 줄의 따옴표 안에 그 경로를 붙여넣습니다.
 
+
+## 이번 수업의 Codex CLI 버전
+
+이 설치 도구는 Codex CLI를 npm의 최신 버전으로 설치하지 않습니다.
+
+2026년 5월 TanStack npm 공급망 이슈가 공개된 뒤에는, 수업 중 설치가 흔들리지 않도록 **이슈 공개 이전의 안정 버전인 `@openai/codex@0.130.0`**으로 고정해서 설치합니다.
+
+수강생은 버전을 직접 고를 필요가 없습니다. 아래 3줄 설치 명령을 실행하면 스크립트가 Ubuntu 안에서 고정 버전을 설치합니다.
+
+설치가 끝난 뒤 Ubuntu 앱에서 아래처럼 확인합니다.
+
+```bash
+codex --version
+```
+
+이미 다른 Codex CLI 버전이 설치되어 있으면, 수업 기준에 맞추기 위해 `0.130.0`으로 다시 설치될 수 있습니다.
+
 ## 7. Windows 설치 명령 실행하기
 
 아래 3줄을 **Windows PowerShell**에 입력합니다. 첫 줄의 따옴표 안에는 방금 복사한 폴더 경로를 붙여넣으세요.
@@ -104,6 +121,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
 - 이 명령은 **PowerShell**에 붙여넣는 명령입니다.
 - 이 명령은 **Ubuntu 앱에 붙여넣는 명령이 아닙니다.**
 - `bash scripts/...`로 시작하는 명령은 지금 단계에서 쓰지 않습니다.
+- Codex CLI는 수업 기준 버전인 `@openai/codex@0.130.0`으로 설치됩니다.
 
 ## 8. 설치 중 안내가 나오면 이렇게 하세요
 
@@ -174,8 +192,11 @@ powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
 4. 아래 명령을 입력합니다.
 
 ```bash
+codex --version
 codex
 ```
+
+`codex --version`에서 `0.130.0`이 보이면 수업 기준 버전으로 설치된 것입니다.
 
 처음 실행하면 로그인 안내가 나올 수 있습니다. 화면에 웹사이트 주소나 로그인 안내가 보이면 그대로 따라 하세요. 브라우저가 열리면 본인의 ChatGPT/OpenAI 계정으로 로그인합니다. 로그인 후 Ubuntu 창으로 돌아오면 Codex를 사용할 수 있습니다.
 

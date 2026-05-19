@@ -14,6 +14,12 @@ warn() {
   printf '[WARN] %s\n' "$1"
 }
 
+# Pin Codex CLI to the last stable npm release before the TanStack npm
+# supply-chain incident became public on 2026-05-12 UTC. Override only when
+# you intentionally choose a different classroom version.
+CODEX_NPM_VERSION="${CODEX_NPM_VERSION:-0.130.0}"
+CODEX_NPM_PACKAGE="${CODEX_NPM_PACKAGE:-@openai/codex}"
+
 assert_package_installs_allowed() {
   if [[ "${CODEX_BOOTSTRAP_ALLOW_PACKAGE_INSTALLS:-}" == "1" ]]; then
     return 0
@@ -95,13 +101,19 @@ ensure_npm_prefix() {
 
 ensure_codex() {
   if command -v codex >/dev/null 2>&1; then
-    info "Codex CLI already installed: $(codex --version | head -n 1)"
-    return 0
+    local current_codex
+    current_codex="$(codex --version | head -n 1)"
+    if [[ "$current_codex" == *"$CODEX_NPM_VERSION"* ]]; then
+      info "Codex CLI already installed at pinned classroom version: $current_codex"
+      return 0
+    fi
+    warn "Codex CLI is installed, but not at the pinned classroom version $CODEX_NPM_VERSION: $current_codex"
+    warn "Reinstalling pinned npm version for this classroom setup."
   fi
 
-  info "Installing Codex CLI..."
+  info "Installing Codex CLI from npm at pinned version: ${CODEX_NPM_PACKAGE}@${CODEX_NPM_VERSION}"
   assert_package_installs_allowed
-  npm install -g @openai/codex
+  npm install -g "${CODEX_NPM_PACKAGE}@${CODEX_NPM_VERSION}"
   info "Codex CLI installed: $(codex --version | head -n 1)"
 }
 

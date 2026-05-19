@@ -92,11 +92,11 @@ fi
 if [[ "${1-}" == "config" && "${2-}" == "set" && "${3-}" == "prefix" ]]; then
   exit 0
 fi
-if [[ "${1-}" == "install" && "${2-}" == "-g" && "${3-}" == "@openai/codex" ]]; then
+if [[ "${1-}" == "install" && "${2-}" == "-g" && "${3-}" == "@openai/codex@0.130.0" ]]; then
   mkdir -p "$HOME/.local/npm-global/bin"
   cat > "$HOME/.local/npm-global/bin/codex" <<'CODEXEOF'
 #!/bin/bash
-printf 'codex 0.0.0-test\n'
+printf 'codex 0.130.0\n'
 CODEXEOF
   chmod +x "$HOME/.local/npm-global/bin/codex"
   exit 0
@@ -164,10 +164,10 @@ grep -q 'apt-get install -y build-essential ca-certificates curl git python3 pyt
 grep -q 'curl -fsSL https://deb.nodesource.com/setup_20.x' "$TEST_LOG"
 grep -q 'apt-get install -y nodejs' "$TEST_LOG"
 grep -Eq 'npm config set prefix .*/home/.local/npm-global' "$TEST_LOG"
-grep -q 'npm install -g @openai/codex' "$TEST_LOG"
+grep -q 'npm install -g @openai/codex@0.130.0' "$TEST_LOG"
 grep -q 'export PATH="$HOME/.local/npm-global/bin:$PATH"' "$TEST_HOME/.bashrc"
 grep -q 'export PATH="$HOME/.local/npm-global/bin:$PATH"' "$TEST_HOME/.zshrc"
 grep -q 'export PATH="$HOME/.local/npm-global/bin:$PATH"' "$TEST_HOME/.profile"
-grep -q 'codex 0.0.0-test' "$OUTPUT_FILE"
+grep -q 'codex 0.130.0' "$OUTPUT_FILE"
 
 printf 'Linux installer smoke test passed.\n'
